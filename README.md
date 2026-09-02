@@ -99,18 +99,10 @@ Os arquivos serão gerados na pasta `dist/`.
 
 ---
 
-## 🌐 Publicação no GitHub Pages
+## 🌐 Publicação no GitHub Pages (Online)
 
-1. Inicialize o repositório git (se ainda não tiver feito):
-   ```bash
-   git init
-   git add .
-   git commit -m "feat: Sistema completo JL Imports"
-   ```
-2. Crie um repositório no seu GitHub e envie os arquivos:
-   ```bash
-   git remote add origin https://github.com/SEU_USUARIO/jlimports.git
-   git branch -M main
-   git push -u origin main
-   ```
-3. O projeto está configurado com `base: './'` no `vite.config.js`, permitindo que o deploy via GitHub Actions ou branch `gh-pages` com a pasta `dist/` funcione imediatamente sem erros de caminho de assets.
+O projeto já está publicado e ativo na nuvem do GitHub Pages:
+
+- **Catálogo Online:** [https://jlimports592-ctrl.github.io/JLimports/](https://jlimports592-ctrl.github.io/JLimports/)
+- **Painel Administrativo Online:** [https://jlimports592-ctrl.github.io/JLimports/admin.html](https://jlimports592-ctrl.github.io/JLimports/admin.html)
+- **Repositório GitHub:** [https://github.com/jlimports592-ctrl/JLimports](https://github.com/jlimports592-ctrl/JLimports)
