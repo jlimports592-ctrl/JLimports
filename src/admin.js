@@ -121,13 +121,16 @@ function setupEventListeners() {
   });
 
   // Modal de Produto
+  // Modal de Produto e Semeadura Inicial
   const btnNewProduct = document.getElementById('btn-new-product');
+  const btnSeedProducts = document.getElementById('btn-seed-products');
   const productModal = document.getElementById('product-modal');
   const btnCloseProductModal = document.getElementById('btn-close-product-modal');
   const btnCancelProductModal = document.getElementById('btn-cancel-product-modal');
   const productForm = document.getElementById('product-form');
 
   btnNewProduct?.addEventListener('click', () => openProductModal());
+  btnSeedProducts?.addEventListener('click', () => handleSeedInitialProducts());
   btnCloseProductModal?.addEventListener('click', () => closeProductModal());
   btnCancelProductModal?.addEventListener('click', () => closeProductModal());
   productForm?.addEventListener('submit', handleSaveProduct);
@@ -308,21 +311,27 @@ function saveLocalProducts(list) {
  */
 function renderProductsTable() {
   const tbody = document.getElementById('products-table-body');
+  const btnSeed = document.getElementById('btn-seed-products');
   if (!tbody) return;
 
   if (productsList.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:30px;">Nenhum produto cadastrado ainda.</td></tr>`;
+    if (btnSeed) btnSeed.style.display = 'inline-flex';
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:30px;">
+      Nenhum produto cadastrado ainda. Use o botão <strong>"Cadastrar Novo Produto"</strong> ou <strong>"Carregar 6 Produtos Iniciais"</strong> para começar.
+    </td></tr>`;
     return;
   }
+
+  if (btnSeed) btnSeed.style.display = 'none';
 
   tbody.innerHTML = productsList.map((prod) => `
     <tr>
       <td style="width: 60px;">
         <img 
-          src="${prod.imagem || '/logo.png'}" 
+          src="${prod.imagem || './public/logo.png'}" 
           alt="${prod.nome}" 
-          style="width: 44px; height: 44px; object-fit: cover; border-radius: var(--radius-sm); background: #000;"
-          onerror="this.onerror=null; this.src='/logo.png';"
+          style="width: 44px; height: 44px; object-fit: contain; border-radius: var(--radius-sm); background: #000; padding: 2px;"
+          onerror="this.onerror=null; this.src='./public/logo.png';"
         />
       </td>
       <td>
@@ -374,6 +383,42 @@ function renderProductsTable() {
   });
 }
 
+/**
+ * Popula o banco com os 6 produtos padrão caso esteja vazio
+ */
+async function handleSeedInitialProducts() {
+  if (!confirm('Deseja carregar os 6 produtos argentinos padrão (vinhos, alfajores, doce de leite) no banco de dados?')) return;
+
+  const btnSeed = document.getElementById('btn-seed-products');
+  if (btnSeed) {
+    btnSeed.textContent = 'Carregando...';
+    btnSeed.disabled = true;
+  }
+
+  try {
+    if (isFirebaseConfigured && db) {
+      for (const prod of PRODUTOS_PADRAO) {
+        const { id, ...data } = prod;
+        data.criadoEm = serverTimestamp();
+        data.atualizadoEm = new Date().toISOString();
+        await addDoc(collection(db, 'produtos'), data);
+      }
+    } else {
+      saveLocalProducts([...PRODUTOS_PADRAO]);
+    }
+    await loadProducts();
+    alert('Produtos iniciais carregados com sucesso!');
+  } catch (err) {
+    console.error('Erro ao semear produtos:', err);
+    alert('Erro ao carregar produtos iniciais no Firebase. Verifique o console.');
+  } finally {
+    if (btnSeed) {
+      btnSeed.textContent = '📦 Carregar 6 Produtos Iniciais no Banco';
+      btnSeed.disabled = false;
+    }
+  }
+}
+
 function openProductModal(prod = null) {
   const modal = document.getElementById('product-modal');
   const title = document.getElementById('product-modal-title');
@@ -423,7 +468,8 @@ async function handleSaveProduct(e) {
   const id = document.getElementById('prod-id').value;
   const nome = document.getElementById('prod-nome').value.trim();
   const categoria = document.getElementById('prod-categoria').value;
-  const preco = parseFloat(document.getElementById('prod-preco').value) || 0;
+  const rawPreco = String(document.getElementById('prod-preco').value).replace(',', '.');
+  const preco = parseFloat(rawPreco) || 0;
   const descricao = document.getElementById('prod-descricao').value.trim();
   const ativo = document.getElementById('prod-ativo').checked;
   const imageUrl = document.getElementById('product-image-url').value.trim();
@@ -553,21 +599,33 @@ function renderFinancialData() {
   const metricExpense = document.getElementById('metric-total-expense');
   const metricBalance = document.getElementById('metric-total-balance');
 
-  // Filtra por período
+  // Filtra por período com comparação direta de strings YYYY-MM-DD (sem distorção de fuso horário)
   const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  const todayStr = `${y}-${m}-${d}`;
+  const currentMonthStr = `${y}-${m}`;
+
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(now.getDate() - 7);
+  const y7 = sevenDaysAgo.getFullYear();
+  const m7 = String(sevenDaysAgo.getMonth() + 1).padStart(2, '0');
+  const d7 = String(sevenDaysAgo.getDate()).padStart(2, '0');
+  const sevenDaysAgoStr = `${y7}-${m7}-${d7}`;
+
   const filtered = transactionsList.filter((item) => {
     if (financialFilter === 'todos') return true;
-    const itemDate = new Date(item.data + 'T00:00:00');
+    const itemDateStr = (item.data || '').split('T')[0];
 
     if (financialFilter === 'hoje') {
-      return itemDate.toDateString() === now.toDateString();
+      return itemDateStr === todayStr;
     }
     if (financialFilter === 'semana') {
-      const diffDays = Math.floor((now - itemDate) / (1000 * 60 * 60 * 24));
-      return diffDays >= 0 && diffDays <= 7;
+      return itemDateStr >= sevenDaysAgoStr && itemDateStr <= todayStr;
     }
     if (financialFilter === 'mes') {
-      return itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+      return itemDateStr.startsWith(currentMonthStr);
     }
     return true;
   });
@@ -601,8 +659,7 @@ function renderFinancialData() {
   tbody.innerHTML = filtered.map((item) => {
     const isEntrada = item.tipo === 'entrada';
     const tagInfo = isEntrada ? item.formaPagamento || 'Pagamento' : item.categoriaDespesa || 'Despesa';
-    const [year, month, day] = item.data.split('-');
-    const formattedDate = `${day}/${month}/${year}`;
+    const formattedDate = formatDisplayDate(item.data);
 
     return `
       <tr>
@@ -623,7 +680,10 @@ function renderFinancialData() {
             ${isEntrada ? '+' : '-'} ${formatCurrency(item.valor)}
           </strong>
         </td>
-        <td style="text-align: right;">
+        <td style="text-align: right; white-space: nowrap;">
+          <button type="button" class="btn btn-secondary btn-edit-trans" data-id="${item.id}" style="padding: 5px 10px; font-size: 12px; margin-right: 6px;">
+            Editar
+          </button>
           <button type="button" class="btn btn-danger btn-del-trans" data-id="${item.id}" style="padding: 5px 10px; font-size: 12px;">
             Excluir
           </button>
@@ -631,6 +691,15 @@ function renderFinancialData() {
       </tr>
     `;
   }).join('');
+
+  // Eventos de edição e exclusão de lançamentos
+  tbody.querySelectorAll('.btn-edit-trans').forEach((b) => {
+    b.addEventListener('click', (e) => {
+      const id = e.currentTarget.getAttribute('data-id');
+      const trans = transactionsList.find((t) => String(t.id) === String(id));
+      if (trans) openTransactionModal(trans);
+    });
+  });
 
   tbody.querySelectorAll('.btn-del-trans').forEach((b) => {
     b.addEventListener('click', (e) => {
@@ -640,17 +709,54 @@ function renderFinancialData() {
   });
 }
 
-function openTransactionModal() {
+function formatDisplayDate(dateStr) {
+  if (!dateStr) return '';
+  const clean = dateStr.split('T')[0];
+  const parts = clean.split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return dateStr;
+}
+
+function openTransactionModal(trans = null) {
   const modal = document.getElementById('transaction-modal');
+  const title = document.getElementById('transaction-modal-title');
   const form = document.getElementById('transaction-form');
   form.reset();
 
-  // Data de hoje como padrão
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('trans-data').value = today;
-  document.getElementById('trans-tipo').value = 'entrada';
-  document.getElementById('group-forma-pagamento').style.display = 'block';
-  document.getElementById('group-categoria-despesa').style.display = 'none';
+  const groupForma = document.getElementById('group-forma-pagamento');
+  const groupCat = document.getElementById('group-categoria-despesa');
+
+  if (trans) {
+    if (title) title.textContent = 'Editar Lançamento Financeiro';
+    document.getElementById('trans-id').value = trans.id;
+    document.getElementById('trans-tipo').value = trans.tipo || 'entrada';
+    document.getElementById('trans-data').value = (trans.data || '').split('T')[0];
+    document.getElementById('trans-descricao').value = trans.descricao || '';
+    document.getElementById('trans-valor').value = trans.valor || '';
+
+    if (trans.tipo === 'saida') {
+      document.getElementById('trans-categoria-despesa').value = trans.categoriaDespesa || 'Outros';
+      if (groupForma) groupForma.style.display = 'none';
+      if (groupCat) groupCat.style.display = 'block';
+    } else {
+      document.getElementById('trans-forma-pagamento').value = trans.formaPagamento || 'Pix';
+      if (groupForma) groupForma.style.display = 'block';
+      if (groupCat) groupCat.style.display = 'none';
+    }
+  } else {
+    if (title) title.textContent = 'Novo Lançamento Financeiro';
+    document.getElementById('trans-id').value = '';
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    document.getElementById('trans-data').value = `${y}-${m}-${d}`;
+    document.getElementById('trans-tipo').value = 'entrada';
+    if (groupForma) groupForma.style.display = 'block';
+    if (groupCat) groupCat.style.display = 'none';
+  }
 
   modal?.classList.add('active');
 }
@@ -661,10 +767,12 @@ function closeTransactionModal() {
 
 async function handleSaveTransaction(e) {
   e.preventDefault();
+  const id = document.getElementById('trans-id').value;
   const tipo = document.getElementById('trans-tipo').value;
   const data = document.getElementById('trans-data').value;
   const descricao = document.getElementById('trans-descricao').value.trim();
-  const valor = parseFloat(document.getElementById('trans-valor').value) || 0;
+  const rawValor = String(document.getElementById('trans-valor').value).replace(',', '.');
+  const valor = parseFloat(rawValor) || 0;
   const formaPagamento = document.getElementById('trans-forma-pagamento').value;
   const categoriaDespesa = document.getElementById('trans-categoria-despesa').value;
 
@@ -675,17 +783,33 @@ async function handleSaveTransaction(e) {
     valor,
     formaPagamento: tipo === 'entrada' ? formaPagamento : '',
     categoriaDespesa: tipo === 'saida' ? categoriaDespesa : '',
-    criadoEm: new Date().toISOString()
+    atualizadoEm: new Date().toISOString()
   };
 
   try {
-    if (isFirebaseConfigured && db) {
-      await addDoc(collection(db, 'financeiro'), transData);
+    if (id) {
+      // Edição
+      if (isFirebaseConfigured && db) {
+        await updateDoc(doc(db, 'financeiro', id), transData);
+      } else {
+        const list = getLocalFinancialRecords();
+        const index = list.findIndex((t) => String(t.id) === String(id));
+        if (index > -1) {
+          list[index] = { ...list[index], ...transData };
+          saveLocalFinancialRecords(list);
+        }
+      }
     } else {
-      const list = getLocalFinancialRecords();
-      transData.id = 'fin_' + Date.now();
-      list.unshift(transData);
-      saveLocalFinancialRecords(list);
+      // Novo
+      transData.criadoEm = new Date().toISOString();
+      if (isFirebaseConfigured && db) {
+        await addDoc(collection(db, 'financeiro'), transData);
+      } else {
+        const list = getLocalFinancialRecords();
+        transData.id = 'fin_' + Date.now();
+        list.unshift(transData);
+        saveLocalFinancialRecords(list);
+      }
     }
 
     closeTransactionModal();

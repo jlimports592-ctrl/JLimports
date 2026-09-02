@@ -41,6 +41,17 @@ export async function fetchProducts() {
         allProducts = items;
         return allProducts;
       }
+
+      // Se o Firestore respondeu vazio, checa se há produtos locais salvos
+      const localSaved = localStorage.getItem('jl_produtos_local');
+      if (localSaved) {
+        const parsed = JSON.parse(localSaved);
+        const activeOnly = parsed.filter((p) => p.ativo !== false);
+        if (activeOnly.length > 0) {
+          allProducts = activeOnly;
+          return allProducts;
+        }
+      }
     } catch (error) {
       console.warn('Erro ao carregar produtos do Firestore, usando locais:', error);
     }
@@ -103,11 +114,11 @@ export function renderCatalog() {
     <article class="product-card" data-id="${product.id}">
       <div class="product-img-wrap">
         <img 
-          src="${product.imagem || '/logo.png'}" 
+          src="${product.imagem || './public/logo.png'}" 
           alt="${product.nome}" 
           class="product-img"
           loading="lazy"
-          onerror="this.onerror=null; this.src='/logo.png';"
+          onerror="this.onerror=null; this.src='./public/logo.png';"
         />
         <span class="product-category-tag">${product.categoria || 'Geral'}</span>
       </div>
@@ -215,10 +226,10 @@ export function updateCartUI() {
     itemsContainer.innerHTML = cart.map((item) => `
       <div class="cart-item" data-id="${item.id}">
         <img 
-          src="${item.imagem || '/logo.png'}" 
+          src="${item.imagem || './public/logo.png'}" 
           alt="${item.nome}" 
           class="cart-item-img"
-          onerror="this.onerror=null; this.src='/logo.png';"
+          onerror="this.onerror=null; this.src='./public/logo.png';"
         />
         <div class="cart-item-info">
           <div>

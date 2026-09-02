@@ -105,12 +105,17 @@
               <h2 class="font-serif" style="font-size: 26px; color: var(--text-main);">Produtos Cadastrados</h2>
               <p style="font-size: 13px; color: var(--text-muted);">Gerencie os itens disponíveis no catálogo público</p>
             </div>
-            <button type="button" class="btn btn-primary" id="btn-new-product">
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-              </svg>
-              <span>Cadastrar Novo Produto</span>
-            </button>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+              <button type="button" class="btn btn-secondary" id="btn-seed-products" style="display: none; font-size: 13px; border-color: var(--border-gold); color: var(--gold-light);">
+                <span>📦 Carregar 6 Produtos Iniciais no Banco</span>
+              </button>
+              <button type="button" class="btn btn-primary" id="btn-new-product">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span>Cadastrar Novo Produto</span>
+              </button>
+            </div>
           </div>
 
           <div id="products-admin-loading" style="display: none; padding: 20px; color: var(--gold-light);">
@@ -288,11 +293,12 @@
     <div class="modal-overlay" id="transaction-modal">
       <div class="modal-box">
         <div class="modal-header">
-          <h3 class="modal-title font-serif">Novo Lançamento Financeiro</h3>
+          <h3 class="modal-title font-serif" id="transaction-modal-title">Novo Lançamento Financeiro</h3>
           <button type="button" class="close-btn" id="btn-close-trans-modal">&times;</button>
         </div>
         <form id="transaction-form">
           <div class="modal-body">
+            <input type="hidden" id="trans-id" />
             
             <div class="form-row">
               <div class="form-group">
