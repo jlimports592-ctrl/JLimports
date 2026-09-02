@@ -1,0 +1,32 @@
+# Dependências
+node_modules/
+.pnp
+.pnp.js
+
+# Build de produção
+dist/
+dist-ssr/
+*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Variáveis de ambiente locais
+.env
+.env.local
+.env.*.local
+
+# Editores e SO
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db

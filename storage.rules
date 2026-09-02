@@ -1,0 +1,15 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Imagens de produtos:
+    // - Qualquer pessoa pode visualizar/baixar imagens
+    // - Apenas o administrador autenticado pode fazer upload ou deletar
+    match /produtos/{imageId} {
+      allow read: if true;
+      allow write, delete: if request.auth != null;
+    }
+
+  }
+}

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel Administrativo — JL Imports</title>
+    <link rel="icon" type="image/png" href="./public/logo.png" />
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body class="admin-body">
+
+    <!-- CABEÇALHO DO ADMIN -->
+    <header class="site-header">
+      <div class="container header-inner">
+        <div class="brand-logo">
+          <img src="./public/logo.png" alt="JL Imports Logo" />
+          <span class="brand-name">JL IMPORTS <span style="font-size: 14px; color: var(--gold-light); font-weight: normal; margin-left: 6px;">| Painel</span></span>
+        </div>
+
+        <div class="header-actions">
+          <a href="./" class="btn btn-secondary" style="font-size: 13px; padding: 6px 14px;">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span>Ver Catálogo</span>
+          </a>
+
+          <div id="admin-user-info" style="display: flex; align-items: center; gap: 12px;">
+            <span id="admin-user-email" style="font-size: 13px; color: var(--silver-accent);"></span>
+            <button type="button" class="btn btn-secondary" id="btn-logout" style="padding: 6px 12px; font-size: 12px;">
+              Sair
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container" style="padding-top: 30px; padding-bottom: 60px;">
+
+      <!-- AVISO DE MODO DEMO / INSTRUÇÕES DE FIREBASE -->
+      <div id="demo-mode-alert" style="display: none; background: rgba(198, 161, 91, 0.1); border: 1px solid var(--border-gold); padding: 14px 20px; border-radius: var(--radius-md); margin-bottom: 24px;">
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+          <span style="font-size: 20px;">ℹ️</span>
+          <div>
+            <strong style="color: var(--gold-light); font-size: 14px;">Modo de Teste Local Ativo</strong>
+            <p style="font-size: 13px; color: var(--silver-accent); margin-top: 2px;">
+              As chaves do Firebase ainda não foram inseridas no arquivo <code>.env</code>. O sistema está funcionando perfeitamente com armazenamento local de teste. Ao preencher o <code>.env</code> com suas credenciais do Firebase Console, a sincronização em nuvem e autenticação por e-mail/senha serão ativadas automaticamente.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TELA DE LOGIN (PROTEÇÃO DE ACESSO) -->
+      <section id="admin-login-section" style="display: none;">
+        <div class="admin-login-card">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <img src="./public/logo.png" alt="JL Imports" style="height: 60px; margin-bottom: 12px;" />
+            <h2 class="font-serif" style="font-size: 24px; color: var(--text-main);">Acesso Restrito</h2>
+            <p style="font-size: 13px; color: var(--text-muted);">Entre com suas credenciais de administrador</p>
+          </div>
+
+          <form id="admin-login-form">
+            <div class="form-group">
+              <label class="form-label" for="login-email">E-mail</label>
+              <input type="email" id="login-email" class="form-control" value="jlimports@gmail.com" placeholder="jlimports@gmail.com" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="login-password">Senha</label>
+              <input type="password" id="login-password" class="form-control" placeholder="••••••••" required />
+            </div>
+
+            <div id="login-error" style="display: none; color: var(--danger); font-size: 13px; margin-bottom: 14px;"></div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">
+              Entrar no Painel
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- PAINEL ADMINISTRATIVO (DASHBOARD) -->
+      <section id="admin-dashboard-section" style="display: none;">
+
+        <!-- ABAS DE NAVEGAÇÃO -->
+        <nav class="admin-nav-tabs">
+          <button type="button" class="admin-tab-btn active" data-tab="produtos">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+            <span>Gestão de Produtos</span>
+          </button>
+          <button type="button" class="admin-tab-btn" data-tab="financeiro">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Controle Financeiro</span>
+          </button>
+        </nav>
+
+        <!-- CONTEÚDO DA ABA 1: PRODUTOS -->
+        <div id="tab-content-produtos">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2 class="font-serif" style="font-size: 26px; color: var(--text-main);">Produtos Cadastrados</h2>
+              <p style="font-size: 13px; color: var(--text-muted);">Gerencie os itens disponíveis no catálogo público</p>
+            </div>
+            <button type="button" class="btn btn-primary" id="btn-new-product">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span>Cadastrar Novo Produto</span>
+            </button>
+          </div>
+
+          <div id="products-admin-loading" style="display: none; padding: 20px; color: var(--gold-light);">
+            Carregando produtos...
+          </div>
+
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Foto</th>
+                  <th>Nome & Descrição</th>
+                  <th>Categoria</th>
+                  <th>Preço</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="products-table-body">
+                <!-- Linhas renderizadas via admin.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- CONTEÚDO DA ABA 2: FINANCEIRO -->
+        <div id="tab-content-financeiro" style="display: none;">
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2 class="font-serif" style="font-size: 26px; color: var(--text-main);">Gestão Financeira</h2>
+              <p style="font-size: 13px; color: var(--text-muted);">Controle simples de entradas (vendas) e saídas (despesas)</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button type="button" class="btn btn-primary" id="btn-new-transaction">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span>Novo Lançamento</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- CARDS DE MÉTRICAS -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-label">Faturamento (Entradas)</span>
+              <span class="metric-value income" id="metric-total-income">R$ 0,00</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Total de Saídas</span>
+              <span class="metric-value expense" id="metric-total-expense">R$ 0,00</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Saldo do Período</span>
+              <span class="metric-value balance" id="metric-total-balance">R$ 0,00</span>
+            </div>
+          </div>
+
+          <!-- FILTRO DE PERÍODO -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="category-btn finance-filter-btn" data-period="hoje">Hoje</button>
+              <button type="button" class="category-btn finance-filter-btn" data-period="semana">Esta Semana</button>
+              <button type="button" class="category-btn finance-filter-btn active" data-period="mes">Este Mês</button>
+              <button type="button" class="category-btn finance-filter-btn" data-period="todos">Todos</button>
+            </div>
+          </div>
+
+          <!-- TABELA DE LANÇAMENTOS -->
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Data</th>
+                  <th>Descrição</th>
+                  <th>Forma / Categoria</th>
+                  <th>Valor</th>
+                  <th style="text-align: right;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="financial-table-body">
+                <!-- Linhas renderizadas via admin.js -->
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- MODAL: CADASTRAR/EDITAR PRODUTO -->
+    <div class="modal-overlay" id="product-modal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title font-serif" id="product-modal-title">Cadastrar Produto</h3>
+          <button type="button" class="close-btn" id="btn-close-product-modal">&times;</button>
+        </div>
+        <form id="product-form">
+          <div class="modal-body">
+            <input type="hidden" id="prod-id" />
+
+            <div class="form-group">
+              <label class="form-label" for="prod-nome">Nome do Produto *</label>
+              <input type="text" id="prod-nome" class="form-control" placeholder="Ex: Vinho Catena Zapata Malbec" required />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="prod-categoria">Categoria *</label>
+                <select id="prod-categoria" class="form-control" required>
+                  <option value="Vinhos">Vinhos</option>
+                  <option value="Alfajores">Alfajores</option>
+                  <option value="Produtos Coloniais">Produtos Coloniais</option>
+                  <option value="Doces">Doces</option>
+                  <option value="Bebidas">Bebidas</option>
+                  <option value="Outros">Outros</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="prod-preco">Preço (R$) *</label>
+                <input type="number" step="0.01" min="0" id="prod-preco" class="form-control" placeholder="Ex: 120.00" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prod-descricao">Descrição Curta</label>
+              <textarea id="prod-descricao" class="form-control" rows="3" placeholder="Detalhes, safra, notas de sabor, origem..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="product-image-url">Link da Imagem (URL da foto)</label>
+              <input type="url" id="product-image-url" class="form-control" placeholder="https://exemplo.com/foto-do-produto.jpg" />
+              <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px; display: block;">
+                Cole o link direto da imagem (ex: do Google, site do fornecedor, etc.).
+              </small>
+              <div class="admin-preview-container">
+                <span style="font-size: 11px; color: var(--silver-accent);">Pré-visualização fiel da foto no Card:</span>
+                <div class="admin-preview-frame">
+                  <img id="product-image-preview" class="admin-preview-img" src="" alt="Pré-visualização da Foto" />
+                  <div id="product-image-placeholder" class="admin-preview-placeholder">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span>Cole uma URL para ver o produto</span>
+                  </div>
+                </div>
+                <small style="color: var(--text-muted); font-size: 11px;">
+                  A garrafa ou caixa aparecerá 100% inteira (sem cortar gargalo, rótulo ou base).
+                </small>
+              </div>
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 14px;">
+              <input type="checkbox" id="prod-ativo" style="width: 18px; height: 18px; accent-color: var(--gold-primary);" checked />
+              <label for="prod-ativo" style="font-size: 14px; cursor: pointer; color: var(--text-main);">
+                Produto ativo (visível para os clientes no catálogo)
+              </label>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btn-cancel-product-modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="btn-save-product">Salvar Produto</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: NOVO LANÇAMENTO FINANCEIRO -->
+    <div class="modal-overlay" id="transaction-modal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title font-serif">Novo Lançamento Financeiro</h3>
+          <button type="button" class="close-btn" id="btn-close-trans-modal">&times;</button>
+        </div>
+        <form id="transaction-form">
+          <div class="modal-body">
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="trans-tipo">Tipo de Operação *</label>
+                <select id="trans-tipo" class="form-control" required>
+                  <option value="entrada">↓ Entrada (Venda)</option>
+                  <option value="saida">↑ Saída (Despesa)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="trans-data">Data *</label>
+                <input type="date" id="trans-data" class="form-control" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="trans-descricao">Descrição do Lançamento *</label>
+              <input type="text" id="trans-descricao" class="form-control" placeholder="Ex: Venda 3x Malbec ou Pagamento Fornecedor" required />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="trans-valor">Valor (R$) *</label>
+                <input type="number" step="0.01" min="0.01" id="trans-valor" class="form-control" placeholder="0.00" required />
+              </div>
+
+              <!-- Exibido apenas se Entrada -->
+              <div class="form-group" id="group-forma-pagamento">
+                <label class="form-label" for="trans-forma-pagamento">Forma de Pagamento</label>
+                <select id="trans-forma-pagamento" class="form-control">
+                  <option value="Pix">Pix</option>
+                  <option value="Dinheiro">Dinheiro</option>
+                  <option value="Cartão de Crédito">Cartão de Crédito</option>
+                  <option value="Cartão de Débito">Cartão de Débito</option>
+                  <option value="Vale iFood">Vale iFood</option>
+                </select>
+              </div>
+
+              <!-- Exibido apenas se Saída -->
+              <div class="form-group" id="group-categoria-despesa" style="display: none;">
+                <label class="form-label" for="trans-categoria-despesa">Categoria da Despesa</label>
+                <select id="trans-categoria-despesa" class="form-control">
+                  <option value="Fornecedores">Fornecedores</option>
+                  <option value="Frete & Transporte">Frete & Transporte</option>
+                  <option value="Embalagens">Embalagens</option>
+                  <option value="Despesas Operacionais">Despesas Operacionais</option>
+                  <option value="Outros">Outros</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btn-cancel-trans-modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Registrar Lançamento</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script type="module" src="./src/admin.js"></script>
+  </body>
+</html>

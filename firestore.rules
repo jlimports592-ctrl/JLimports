@@ -1,0 +1,21 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // PRODUTOS:
+    // - Qualquer pessoa pode ler produtos que estejam marcados como ativo == true
+    // - Usuário autenticado (Admin) pode ler todos e criar/editar/excluir
+    match /produtos/{produtoId} {
+      allow read: if resource.data.ativo == true || request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    // FINANCEIRO:
+    // - Apenas usuário autenticado (Admin) tem permissão de leitura e escrita
+    match /financeiro/{registroId} {
+      allow read, write: if request.auth != null;
+    }
+
+  }
+}
