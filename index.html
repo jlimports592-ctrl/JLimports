@@ -28,14 +28,14 @@
             <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
             </svg>
-            <span>Admin</span>
+            <span class="admin-link-text">Admin</span>
           </a>
 
           <button type="button" class="cart-trigger-btn" id="cart-trigger-btn" aria-label="Abrir Carrinho">
             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
             </svg>
-            <span>Carrinho</span>
+            <span class="cart-trigger-text">Carrinho</span>
             <span class="cart-badge" id="header-cart-badge" style="display: none;">0</span>
           </button>
         </div>
@@ -210,6 +210,22 @@
         </button>
       </div>
     </aside>
+
+    <!-- BARRA FLUTUANTE DE CARRINHO NO MOBILE -->
+    <div class="mobile-floating-cart-bar" id="mobile-floating-cart-bar" style="display: none;">
+      <button type="button" class="mobile-cart-action-btn" id="mobile-cart-action-btn">
+        <div class="mobile-cart-btn-left">
+          <span class="mobile-cart-badge-pill" id="mobile-cart-badge-pill">0</span>
+          <span>Ver Carrinho</span>
+        </div>
+        <div class="mobile-cart-btn-right">
+          <span id="mobile-cart-total-text">R$ 0,00</span>
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </div>
+      </button>
+    </div>
 
     <script type="module" src="./src/main.js"></script>
   </body>

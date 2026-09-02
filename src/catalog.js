@@ -231,6 +231,16 @@ export function updateCartUI() {
     badge.style.display = count > 0 ? 'flex' : 'none';
   }
 
+  const mobileCartBar = document.getElementById('mobile-floating-cart-bar');
+  const mobileCartBadge = document.getElementById('mobile-cart-badge-pill');
+  const mobileCartTotal = document.getElementById('mobile-cart-total-text');
+
+  if (mobileCartBadge) mobileCartBadge.textContent = count;
+  if (mobileCartTotal) mobileCartTotal.textContent = formatCurrency(getCartTotal());
+  if (mobileCartBar) {
+    mobileCartBar.style.display = count > 0 ? 'block' : 'none';
+  }
+
   const itemsContainer = document.getElementById('cart-items-container');
   const emptyState = document.getElementById('cart-empty-state');
   const footer = document.getElementById('cart-drawer-footer');
@@ -391,8 +401,10 @@ export function initCatalog() {
   const cartClose = document.getElementById('cart-close-btn');
   const cartOverlay = document.getElementById('cart-overlay');
   const checkoutBtn = document.getElementById('btn-checkout-whatsapp');
+  const mobileCartBtn = document.getElementById('mobile-cart-action-btn');
 
   cartTrigger?.addEventListener('click', openCartDrawer);
+  mobileCartBtn?.addEventListener('click', openCartDrawer);
   cartClose?.addEventListener('click', closeCartDrawer);
   cartOverlay?.addEventListener('click', closeCartDrawer);
   checkoutBtn?.addEventListener('click', checkoutViaWhatsApp);
