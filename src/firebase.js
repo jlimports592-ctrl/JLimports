@@ -92,6 +92,8 @@ export const PRODUTOS_PADRAO = [
     categoria: 'Vinhos',
     preco: 380.00,
     imagem: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=600&q=80',
+    tipoEstoque: 'pronta_entrega',
+    prazoReserva: '',
     ativo: true,
   },
   {
@@ -101,6 +103,8 @@ export const PRODUTOS_PADRAO = [
     categoria: 'Vinhos',
     preco: 290.00,
     imagem: 'https://images.unsplash.com/photo-1558001373-7b93ee48ffa0?auto=format&fit=crop&w=600&q=80',
+    tipoEstoque: 'reserva',
+    prazoReserva: 'Previsão de busca: 3 a 5 dias úteis',
     ativo: true,
   },
   {
@@ -110,6 +114,8 @@ export const PRODUTOS_PADRAO = [
     categoria: 'Alfajores',
     preco: 85.00,
     imagem: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=600&q=80',
+    tipoEstoque: 'pronta_entrega',
+    prazoReserva: '',
     ativo: true,
   },
   {
@@ -119,6 +125,8 @@ export const PRODUTOS_PADRAO = [
     categoria: 'Doces',
     preco: 48.00,
     imagem: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&w=600&q=80',
+    tipoEstoque: 'reserva',
+    prazoReserva: 'Lote importado sob reserva (3 a 7 dias)',
     ativo: true,
   },
   {
@@ -128,6 +136,8 @@ export const PRODUTOS_PADRAO = [
     categoria: 'Produtos Coloniais',
     preco: 36.00,
     imagem: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=600&q=80',
+    tipoEstoque: 'pronta_entrega',
+    prazoReserva: '',
     ativo: true,
   },
   {
@@ -137,6 +147,8 @@ export const PRODUTOS_PADRAO = [
     categoria: 'Bebidas',
     preco: 79.00,
     imagem: 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=600&q=80',
+    tipoEstoque: 'pronta_entrega',
+    prazoReserva: '',
     ativo: true,
   }
 ];

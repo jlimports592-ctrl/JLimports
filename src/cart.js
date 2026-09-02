@@ -45,6 +45,8 @@ export function addToCart(product, quantity = 1) {
       preco: Number(product.preco) || 0,
       imagem: product.imagem || '',
       categoria: product.categoria || '',
+      tipoEstoque: product.tipoEstoque || 'pronta_entrega',
+      prazoReserva: product.prazoReserva || '',
       quantity: qtyToAdd,
     });
   }
@@ -120,17 +122,29 @@ export function buildWhatsAppMessage() {
   if (cart.length === 0) return '';
 
   let message = `*Olá, JL Imports! Gostaria de fazer o seguinte pedido:*\n\n`;
+  let hasReserva = false;
 
   cart.forEach((item, index) => {
+    const isReserva = item.tipoEstoque === 'reserva';
+    if (isReserva) hasReserva = true;
     const subtotal = item.preco * item.quantity;
-    message += `${index + 1}. *${item.quantity}x* ${item.nome}\n`;
+    const tagEstoque = isReserva 
+      ? ` _(⏳ Sob Encomenda: ${item.prazoReserva || 'Prazo a combinar'})_` 
+      : ` _(📦 Em Estoque / Pronta Entrega)_`;
+
+    message += `${index + 1}. *${item.quantity}x* ${item.nome}${tagEstoque}\n`;
     message += `   _${formatCurrency(item.preco)} cada_ → *${formatCurrency(subtotal)}*\n\n`;
   });
 
   message += `-----------------------------\n`;
   message += `*VALOR TOTAL: ${formatCurrency(getCartTotal())}*\n`;
   message += `-----------------------------\n\n`;
-  message += `Poderia me informar a disponibilidade e as formas de entrega? Obrigado!`;
+
+  if (hasReserva) {
+    message += `*⚠️ ATENÇÃO:* Este pedido inclui produtos sob reserva/encomenda para busca na Argentina.\n\n`;
+  }
+
+  message += `Poderia me confirmar a disponibilidade e os detalhes de entrega/retirada? Obrigado!`;
 
   return message;
 }

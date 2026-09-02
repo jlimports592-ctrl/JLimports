@@ -507,11 +507,21 @@ button {
   transform: scale(1.05);
 }
 
-.product-category-tag {
+/* Badges Superiores no Card */
+.product-badges-top {
   position: absolute;
   top: 12px;
   left: 12px;
-  background: rgba(11, 11, 12, 0.85);
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.product-category-tag {
+  background: rgba(11, 11, 12, 0.88);
   backdrop-filter: blur(8px);
   border: 1px solid var(--border-subtle);
   color: var(--gold-light);
@@ -521,6 +531,94 @@ button {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
+}
+
+.stock-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(8px);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stock-badge.stock-pronta {
+  background: rgba(6, 78, 59, 0.85);
+  color: #6EE7B7;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.stock-badge.stock-reserva {
+  background: rgba(120, 53, 15, 0.88);
+  color: #FCD34D;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Informativo de Reserva no Card */
+.reserva-notice-box {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px dashed rgba(245, 158, 11, 0.4);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #FCD34D;
+  line-height: 1.4;
+}
+
+.reserva-notice-box svg {
+  flex-shrink: 0;
+  color: #F59E0B;
+}
+
+.pronta-notice-box {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #A7F3D0;
+}
+
+.pronta-notice-box svg {
+  flex-shrink: 0;
+  color: #10B981;
+}
+
+/* Botão de Reserva */
+.btn-add-cart.btn-reserva {
+  background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+  color: #FFF;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.btn-add-cart.btn-reserva:hover {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35);
+}
+
+/* Tag no Carrinho */
+.cart-reserva-badge {
+  display: inline-block;
+  font-size: 10px;
+  background: rgba(245, 158, 11, 0.2);
+  color: #FCD34D;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  margin-left: 6px;
+  font-weight: 500;
+  vertical-align: middle;
 }
 
 .product-body {

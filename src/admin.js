@@ -152,6 +152,22 @@ function setupEventListeners() {
     }
   });
 
+  // Tipo de Estoque / Sob Encomenda
+  const tipoEstoqueSelect = document.getElementById('prod-tipo-estoque');
+  const groupPrazoReserva = document.getElementById('group-prazo-reserva');
+  const prazoReservaInput = document.getElementById('prod-prazo-reserva');
+
+  tipoEstoqueSelect?.addEventListener('change', (e) => {
+    if (e.target.value === 'reserva') {
+      if (groupPrazoReserva) groupPrazoReserva.style.display = 'block';
+      if (prazoReservaInput && !prazoReservaInput.value) {
+        prazoReservaInput.value = 'Previsão: 3 a 5 dias úteis';
+      }
+    } else {
+      if (groupPrazoReserva) groupPrazoReserva.style.display = 'none';
+    }
+  });
+
   // Modal de Lançamento Financeiro
   const btnNewTransaction = document.getElementById('btn-new-transaction');
   const transactionModal = document.getElementById('transaction-modal');
@@ -351,9 +367,14 @@ function renderProductsTable() {
         </strong>
       </td>
       <td>
-        <span class="status-badge ${prod.ativo !== false ? 'active' : 'inactive'}">
-          ${prod.ativo !== false ? '● Ativo' : '○ Inativo'}
-        </span>
+        <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-start;">
+          <span class="status-badge ${prod.ativo !== false ? 'active' : 'inactive'}">
+            ${prod.ativo !== false ? '● Ativo' : '○ Inativo'}
+          </span>
+          <span style="font-size: 11px; padding: 2px 8px; border-radius: var(--radius-full); background: ${prod.tipoEstoque === 'reserva' ? 'rgba(217, 119, 6, 0.15)' : 'rgba(16, 185, 129, 0.12)'}; color: ${prod.tipoEstoque === 'reserva' ? '#F59E0B' : '#10B981'}; border: 1px solid ${prod.tipoEstoque === 'reserva' ? 'rgba(217, 119, 6, 0.3)' : 'rgba(16, 185, 129, 0.25)'}; font-weight: 500;">
+            ${prod.tipoEstoque === 'reserva' ? '⏳ Sob Reserva' : '📦 Em Estoque'}
+          </span>
+        </div>
       </td>
       <td style="text-align: right; white-space: nowrap;">
         <button type="button" class="btn btn-secondary btn-edit-prod" data-id="${prod.id}" style="padding: 6px 12px; font-size: 12px; margin-right: 6px;">
@@ -435,6 +456,8 @@ function openProductModal(prod = null) {
     placeholder.style.display = 'flex';
   }
 
+  const groupPrazo = document.getElementById('group-prazo-reserva');
+
   if (prod) {
     title.textContent = 'Editar Produto';
     document.getElementById('prod-id').value = prod.id;
@@ -445,6 +468,11 @@ function openProductModal(prod = null) {
     document.getElementById('prod-ativo').checked = prod.ativo !== false;
     document.getElementById('product-image-url').value = prod.imagem || '';
 
+    const tipoEstoque = prod.tipoEstoque || 'pronta_entrega';
+    document.getElementById('prod-tipo-estoque').value = tipoEstoque;
+    document.getElementById('prod-prazo-reserva').value = prod.prazoReserva || '';
+    if (groupPrazo) groupPrazo.style.display = tipoEstoque === 'reserva' ? 'block' : 'none';
+
     if (prod.imagem && preview) {
       preview.src = prod.imagem;
       preview.style.display = 'block';
@@ -454,6 +482,9 @@ function openProductModal(prod = null) {
     title.textContent = 'Novo Produto';
     document.getElementById('prod-id').value = '';
     document.getElementById('prod-ativo').checked = true;
+    document.getElementById('prod-tipo-estoque').value = 'pronta_entrega';
+    document.getElementById('prod-prazo-reserva').value = '';
+    if (groupPrazo) groupPrazo.style.display = 'none';
   }
 
   modal?.classList.add('active');
@@ -474,6 +505,9 @@ async function handleSaveProduct(e) {
   const ativo = document.getElementById('prod-ativo').checked;
   const imageUrl = document.getElementById('product-image-url').value.trim();
 
+  const tipoEstoque = document.getElementById('prod-tipo-estoque').value;
+  const prazoReserva = tipoEstoque === 'reserva' ? (document.getElementById('prod-prazo-reserva').value.trim() || 'Prazo a combinar') : '';
+
   const saveBtn = document.getElementById('btn-save-product');
   if (saveBtn) {
     saveBtn.textContent = 'Salvando...';
@@ -487,7 +521,9 @@ async function handleSaveProduct(e) {
       preco,
       descricao,
       ativo,
-      imagem: imageUrl || 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=600&q=80',
+      tipoEstoque,
+      prazoReserva,
+      imagem: imageUrl || './public/logo.png',
       atualizadoEm: new Date().toISOString()
     };
 

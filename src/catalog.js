@@ -110,8 +110,12 @@ export function renderCatalog() {
 
   if (empty) empty.style.display = 'none';
 
-  container.innerHTML = filtered.map((product) => `
-    <article class="product-card" data-id="${product.id}">
+  container.innerHTML = filtered.map((product) => {
+    const isReserva = product.tipoEstoque === 'reserva';
+    const prazoTexto = product.prazoReserva || 'Prazo a combinar';
+
+    return `
+    <article class="product-card ${isReserva ? 'card-reserva' : ''}" data-id="${product.id}">
       <div class="product-img-wrap">
         <img 
           src="${product.imagem || './public/logo.png'}" 
@@ -120,13 +124,34 @@ export function renderCatalog() {
           loading="lazy"
           onerror="this.onerror=null; this.src='./public/logo.png';"
         />
-        <span class="product-category-tag">${product.categoria || 'Geral'}</span>
+        <div class="product-badges-top">
+          <span class="product-category-tag">${product.categoria || 'Geral'}</span>
+          <span class="stock-badge ${isReserva ? 'stock-reserva' : 'stock-pronta'}">
+            ${isReserva ? '⏳ Sob Encomenda' : '● Em Estoque'}
+          </span>
+        </div>
       </div>
 
       <div class="product-body">
         <h3 class="product-title font-serif">${product.nome}</h3>
         <p class="product-description">${product.descricao || 'Produto argentino selecionado pela JL Imports.'}</p>
         
+        ${isReserva ? `
+          <div class="reserva-notice-box">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span><strong>Sob Reserva:</strong> ${prazoTexto}</span>
+          </div>
+        ` : `
+          <div class="pronta-notice-box">
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>Disponível para entrega imediata</span>
+          </div>
+        `}
+
         <div class="product-footer">
           <div class="price-tag">
             <span class="price-currency">R$</span>
@@ -140,17 +165,22 @@ export function renderCatalog() {
               <button type="button" class="qty-btn btn-plus" aria-label="Aumentar">+</button>
             </div>
 
-            <button type="button" class="btn-add-cart" data-id="${product.id}">
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            <button type="button" class="btn-add-cart ${isReserva ? 'btn-reserva' : ''}" data-id="${product.id}">
+              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                ${isReserva ? `
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                ` : `
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                `}
               </svg>
-              Adicionar
+              <span>${isReserva ? 'Reservar' : 'Adicionar'}</span>
             </button>
           </div>
         </div>
       </div>
     </article>
-  `).join('');
+  `;
+  }).join('');
 
   attachProductEventListeners();
 }
@@ -233,7 +263,10 @@ export function updateCartUI() {
         />
         <div class="cart-item-info">
           <div>
-            <h4 class="cart-item-name">${item.nome}</h4>
+            <h4 class="cart-item-name">
+              ${item.nome}
+              ${item.tipoEstoque === 'reserva' ? '<span class="cart-reserva-badge">⏳ Reserva</span>' : ''}
+            </h4>
             <div class="cart-item-price">${formatCurrency(item.preco)}</div>
           </div>
 
