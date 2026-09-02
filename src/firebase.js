@@ -104,7 +104,7 @@ export const PRODUTOS_PADRAO = [
     preco: 290.00,
     imagem: 'https://images.unsplash.com/photo-1558001373-7b93ee48ffa0?auto=format&fit=crop&w=600&q=80',
     tipoEstoque: 'reserva',
-    prazoReserva: 'Previsão de busca: 3 a 5 dias úteis',
+    prazoReserva: 'Previsão a tratar',
     ativo: true,
   },
   {
@@ -126,7 +126,7 @@ export const PRODUTOS_PADRAO = [
     preco: 48.00,
     imagem: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&w=600&q=80',
     tipoEstoque: 'reserva',
-    prazoReserva: 'Lote importado sob reserva (3 a 7 dias)',
+    prazoReserva: 'Previsão a tratar',
     ativo: true,
   },
   {

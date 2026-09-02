@@ -161,7 +161,7 @@ function setupEventListeners() {
     if (e.target.value === 'reserva') {
       if (groupPrazoReserva) groupPrazoReserva.style.display = 'block';
       if (prazoReservaInput && !prazoReservaInput.value) {
-        prazoReservaInput.value = 'Previsão: 3 a 5 dias úteis';
+        prazoReservaInput.value = 'Previsão a tratar';
       }
     } else {
       if (groupPrazoReserva) groupPrazoReserva.style.display = 'none';
@@ -506,7 +506,7 @@ async function handleSaveProduct(e) {
   const imageUrl = document.getElementById('product-image-url').value.trim();
 
   const tipoEstoque = document.getElementById('prod-tipo-estoque').value;
-  const prazoReserva = tipoEstoque === 'reserva' ? (document.getElementById('prod-prazo-reserva').value.trim() || 'Prazo a combinar') : '';
+  const prazoReserva = tipoEstoque === 'reserva' ? (document.getElementById('prod-prazo-reserva').value.trim() || 'Previsão a tratar') : '';
 
   const saveBtn = document.getElementById('btn-save-product');
   if (saveBtn) {

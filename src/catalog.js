@@ -112,7 +112,7 @@ export function renderCatalog() {
 
   container.innerHTML = filtered.map((product) => {
     const isReserva = product.tipoEstoque === 'reserva';
-    const prazoTexto = product.prazoReserva || 'Prazo a combinar';
+    const prazoTexto = product.prazoReserva || 'Previsão a tratar';
 
     return `
     <article class="product-card ${isReserva ? 'card-reserva' : ''}" data-id="${product.id}">
@@ -141,7 +141,7 @@ export function renderCatalog() {
             <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <span><strong>Sob Reserva:</strong> ${prazoTexto}</span>
+            <span><strong>Sob Encomenda:</strong> ${prazoTexto}</span>
           </div>
         ` : `
           <div class="pronta-notice-box">

@@ -129,7 +129,7 @@ export function buildWhatsAppMessage() {
     if (isReserva) hasReserva = true;
     const subtotal = item.preco * item.quantity;
     const tagEstoque = isReserva 
-      ? ` _(⏳ Sob Encomenda: ${item.prazoReserva || 'Prazo a combinar'})_` 
+      ? ` _(⏳ Sob Encomenda: ${item.prazoReserva || 'Previsão a tratar'})_` 
       : ` _(📦 Em Estoque / Pronta Entrega)_`;
 
     message += `${index + 1}. *${item.quantity}x* ${item.nome}${tagEstoque}\n`;
