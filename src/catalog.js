@@ -30,34 +30,42 @@ let searchQuery = '';
 export async function fetchProducts() {
   if (isFirebaseConfigured && db) {
     try {
-      const q = query(collection(db, 'produtos'), where('ativo', '==', true));
-      const querySnapshot = await getDocs(q);
+      // Busca produtos da coleção do Firestore
+      const querySnapshot = await getDocs(collection(db, 'produtos'));
       const items = [];
       querySnapshot.forEach((doc) => {
-        items.push({ id: doc.id, ...doc.data() });
+        const data = doc.data();
+        if (data.ativo !== false) {
+          items.push({ id: doc.id, ...data });
+        }
       });
 
       if (items.length > 0) {
         allProducts = items;
+        // Salva cópia em cache para carregamento imediato e offline
+        try {
+          localStorage.setItem('jl_produtos_cache', JSON.stringify(items));
+        } catch (_) {}
         return allProducts;
       }
-
-      // Se o Firestore respondeu vazio, checa se há produtos locais salvos
-      const localSaved = localStorage.getItem('jl_produtos_local');
-      if (localSaved) {
-        const parsed = JSON.parse(localSaved);
-        const activeOnly = parsed.filter((p) => p.ativo !== false);
-        if (activeOnly.length > 0) {
-          allProducts = activeOnly;
-          return allProducts;
-        }
-      }
     } catch (error) {
-      console.warn('Erro ao carregar produtos do Firestore, usando locais:', error);
+      console.warn('Aviso ao consultar Firestore em tempo real, verificando cache:', error);
     }
   }
 
-  // Fallback para localStorage ou catálogo padrão
+  // 1º Fallback: Cache dos produtos reais salvos do Firestore
+  const cached = localStorage.getItem('jl_produtos_cache');
+  if (cached) {
+    try {
+      const parsedCache = JSON.parse(cached);
+      if (Array.isArray(parsedCache) && parsedCache.length > 0) {
+        allProducts = parsedCache;
+        return allProducts;
+      }
+    } catch (_) {}
+  }
+
+  // 2º Fallback: Produtos criados localmente no admin
   const localSaved = localStorage.getItem('jl_produtos_local');
   if (localSaved) {
     try {
@@ -72,6 +80,7 @@ export async function fetchProducts() {
     }
   }
 
+  // 3º Fallback: Produtos padrão de demonstração
   allProducts = PRODUTOS_PADRAO;
   return allProducts;
 }
@@ -121,7 +130,9 @@ export function renderCatalog() {
           src="${product.imagem || './public/logo.png'}" 
           alt="${product.nome}" 
           class="product-img"
-          loading="lazy"
+          loading="eager"
+          decoding="async"
+          referrerpolicy="no-referrer"
           onerror="this.onerror=null; this.src='./public/logo.png';"
         />
         <div class="product-badges-top">
@@ -269,6 +280,9 @@ export function updateCartUI() {
           src="${item.imagem || './public/logo.png'}" 
           alt="${item.nome}" 
           class="cart-item-img"
+          loading="eager"
+          decoding="async"
+          referrerpolicy="no-referrer"
           onerror="this.onerror=null; this.src='./public/logo.png';"
         />
         <div class="cart-item-info">

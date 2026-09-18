@@ -143,6 +143,7 @@ function setupEventListeners() {
   imageUrlInput?.addEventListener('input', (e) => {
     const url = e.target.value.trim();
     if (url && imagePreview) {
+      imagePreview.referrerPolicy = 'no-referrer';
       imagePreview.src = url;
       imagePreview.style.display = 'block';
       if (imagePlaceholder) imagePlaceholder.style.display = 'none';
@@ -346,6 +347,9 @@ function renderProductsTable() {
         <img 
           src="${prod.imagem || './public/logo.png'}" 
           alt="${prod.nome}" 
+          loading="eager"
+          decoding="async"
+          referrerpolicy="no-referrer"
           style="width: 44px; height: 44px; object-fit: contain; border-radius: var(--radius-sm); background: #000; padding: 2px;"
           onerror="this.onerror=null; this.src='./public/logo.png';"
         />
