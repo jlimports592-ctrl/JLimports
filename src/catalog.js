@@ -86,6 +86,17 @@ export async function fetchProducts() {
 }
 
 /**
+ * Normaliza textos removendo acentos e convertendo para minúsculas
+ */
+function normalizeSearchText(str) {
+  return String(str || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+/**
  * Renderiza os produtos filtrados
  */
 export function renderCatalog() {
@@ -97,18 +108,25 @@ export function renderCatalog() {
 
   if (loading) loading.style.display = 'none';
 
+  // Divide o termo digitado em palavras-chave para busca flexível
+  const searchTokens = normalizeSearchText(searchQuery).split(/\s+/).filter(Boolean);
+
   let filtered = allProducts.filter((item) => {
-    const matchesCategory = 
-      activeCategory === 'all' || 
-      item.categoria?.toLowerCase() === activeCategory.toLowerCase();
+    // Filtro por Categoria (insensível a maiúsculas/acentos)
+    const itemCatNorm = normalizeSearchText(item.categoria);
+    const activeCatNorm = normalizeSearchText(activeCategory);
+    const matchesCategory = activeCategory === 'all' || itemCatNorm === activeCatNorm;
 
-    const matchesSearch = 
-      !searchQuery ||
-      item.nome?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.descricao?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.categoria?.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!matchesCategory) return false;
+    if (searchTokens.length === 0) return true;
 
-    return matchesCategory && matchesSearch;
+    // Concatena nome, categoria e descrição normalizados
+    const searchableText = normalizeSearchText(
+      `${item.nome || ''} ${item.categoria || ''} ${item.descricao || ''}`
+    );
+
+    // Todas as palavras digitadas pelo usuário devem constar no produto
+    return searchTokens.every((token) => searchableText.includes(token));
   });
 
   if (filtered.length === 0) {
@@ -125,7 +143,7 @@ export function renderCatalog() {
 
     return `
     <article class="product-card ${isReserva ? 'card-reserva' : ''}" data-id="${product.id}">
-      <div class="product-img-wrap">
+      <div class="product-img-wrap" data-img-zoom="${product.id}" title="Clique para ampliar a foto do produto">
         <img 
           src="${product.imagem || './public/logo.png'}" 
           alt="${product.nome}" 
@@ -140,6 +158,13 @@ export function renderCatalog() {
           <span class="stock-badge ${isReserva ? 'stock-reserva' : 'stock-pronta'}">
             ${isReserva ? '⏳ Sob Encomenda' : '● Em Estoque'}
           </span>
+        </div>
+
+        <div class="product-zoom-hint">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path>
+          </svg>
+          <span>Ampliar</span>
         </div>
       </div>
 
@@ -164,19 +189,19 @@ export function renderCatalog() {
         `}
 
         <div class="product-footer">
-          <div class="price-tag">
-            <span class="price-currency">R$</span>
-            <span class="price-value">${Number(product.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+          <div class="product-price-block">
+            <span class="product-price-label">Preço</span>
+            <span class="product-price-value">${formatCurrency(product.preco)}</span>
           </div>
 
-          <div class="product-actions">
+          <div class="product-actions-block">
             <div class="qty-control">
               <button type="button" class="qty-btn btn-minus" aria-label="Diminuir">-</button>
-              <input type="number" class="qty-input" value="1" min="1" max="99" readonly />
+              <input type="number" class="qty-input" value="1" min="1" readonly />
               <button type="button" class="qty-btn btn-plus" aria-label="Aumentar">+</button>
             </div>
 
-            <button type="button" class="btn-add-cart ${isReserva ? 'btn-reserva' : ''}" data-id="${product.id}">
+            <button type="button" class="btn-add-cart ${isReserva ? 'btn-reserva' : ''}">
               <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 ${isReserva ? `
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -197,7 +222,7 @@ export function renderCatalog() {
 }
 
 /**
- * Vincula cliques de quantidade e adição ao carrinho
+ * Vincula cliques de quantidade, adição ao carrinho e zoom de imagem
  */
 function attachProductEventListeners() {
   const cards = document.querySelectorAll('.product-card');
@@ -206,6 +231,13 @@ function attachProductEventListeners() {
     const productId = card.getAttribute('data-id');
     const product = allProducts.find((p) => String(p.id) === String(productId));
     if (!product) return;
+
+    // Zoom da Imagem ao Clicar na Foto
+    const imgWrap = card.querySelector('.product-img-wrap');
+    imgWrap?.addEventListener('click', (e) => {
+      // Não aciona se clicou em alguma tag ou badge específica
+      openImageLightbox(product);
+    });
 
     const minusBtn = card.querySelector('.btn-minus');
     const plusBtn = card.querySelector('.btn-plus');
@@ -370,6 +402,50 @@ export function showToast(message) {
 }
 
 /**
+ * Controle de abertura e fechamento da visualização ampliada de imagem (Lightbox)
+ */
+export function openImageLightbox(product) {
+  const modal = document.getElementById('image-lightbox-modal');
+  const img = document.getElementById('lightbox-img');
+  const title = document.getElementById('lightbox-title');
+  const price = document.getElementById('lightbox-price');
+  const badge = document.getElementById('lightbox-badge');
+
+  if (!modal || !product) return;
+
+  if (img) {
+    img.src = product.imagem || './public/logo.png';
+    img.alt = product.nome || 'Produto ampliado';
+  }
+  if (title) title.textContent = product.nome || '';
+  if (price) price.textContent = formatCurrency(product.preco);
+  if (badge) badge.textContent = product.categoria || 'Geral';
+
+  modal.style.display = 'flex';
+  requestAnimationFrame(() => {
+    modal.classList.add('active');
+  });
+  document.body.style.overflow = 'hidden';
+}
+
+export function closeImageLightbox() {
+  const modal = document.getElementById('image-lightbox-modal');
+  if (!modal) return;
+
+  modal.classList.remove('active');
+  setTimeout(() => {
+    modal.style.display = 'none';
+    const img = document.getElementById('lightbox-img');
+    if (img) img.src = '';
+  }, 220);
+
+  const drawer = document.getElementById('cart-drawer');
+  if (!drawer || !drawer.classList.contains('active')) {
+    document.body.style.overflow = '';
+  }
+}
+
+/**
  * Controle de abertura e fechamento do carrinho lateral
  */
 export function openCartDrawer() {
@@ -422,6 +498,20 @@ export function initCatalog() {
   cartClose?.addEventListener('click', closeCartDrawer);
   cartOverlay?.addEventListener('click', closeCartDrawer);
   checkoutBtn?.addEventListener('click', checkoutViaWhatsApp);
+
+  // Lightbox da Imagem
+  const lightboxCloseBtn = document.getElementById('lightbox-close-btn');
+  const lightboxBackdrop = document.getElementById('lightbox-backdrop');
+
+  lightboxCloseBtn?.addEventListener('click', closeImageLightbox);
+  lightboxBackdrop?.addEventListener('click', closeImageLightbox);
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeImageLightbox();
+      closeCartDrawer();
+    }
+  });
 
   // CTA Encomendas
   const customOrderBtn = document.getElementById('custom-order-whatsapp-btn');

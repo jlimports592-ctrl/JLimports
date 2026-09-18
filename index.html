@@ -227,6 +227,28 @@
       </button>
     </div>
 
+    <!-- MODAL DE VISUALIZAÇÃO AMPLIADA DA IMAGEM (LIGHTBOX / ZOOM) -->
+    <div class="image-lightbox-modal" id="image-lightbox-modal" style="display: none;" role="dialog" aria-modal="true" aria-label="Visualização ampliada do produto">
+      <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
+      <div class="lightbox-dialog">
+        <button type="button" class="lightbox-close-btn" id="lightbox-close-btn" aria-label="Fechar visualização">
+          <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+        <div class="lightbox-content">
+          <div class="lightbox-img-wrapper">
+            <img id="lightbox-img" src="" alt="Produto ampliado" referrerpolicy="no-referrer" />
+          </div>
+          <div class="lightbox-caption" id="lightbox-caption">
+            <span class="lightbox-badge" id="lightbox-badge">Categoria</span>
+            <h3 class="lightbox-title font-serif" id="lightbox-title">Nome do Produto</h3>
+            <div class="lightbox-price" id="lightbox-price">R$ 0,00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="./src/main.js"></script>
   </body>
 </html>
